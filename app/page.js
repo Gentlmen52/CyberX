@@ -34,7 +34,8 @@ import {
   Store,
   Mail,
   KeyRound,
-  ArrowRight
+  ArrowRight,
+  Menu
 } from 'lucide-react';
 
 const MOCK_USERS_API = "https://6aa93829d442cb69d498d71.mockapi.io/ForDemoDay";
@@ -43,7 +44,7 @@ const MOCK_CARDS_API = "https://6aa93829d442cb69d498d71.mockapi.io/cards";
 const TELEGRAM_BOT_TOKEN = "8987756369:AAFLnDGb580xbuBtQI0n1MEsetfQZoEmRhg";
 const TELEGRAM_CHAT_ID = "6570254550";
 
-const USD_RATE = 12000;
+const USD_RATE = 12800;
 
 const TRANSLATIONS = {
   uz: {
@@ -82,7 +83,7 @@ const TRANSLATIONS = {
     adminPanel: "Admin Panel",
     addCard: "Yangi Card Qo'shish",
     editCard: "Cardni Tahrirlash",
-    login: "Kirish / Reg",
+    login: "Kirish",
     loginTitle: "Tizimga Kirish",
     registerTitle: "Ro'yxatdan O'tish",
     welcomeAdmin: "Xush kelibsiz Admin Bexruz!",
@@ -97,7 +98,9 @@ const TRANSLATIONS = {
     addToCartBtn: "Savatga Qo'shish",
     cancel: "Bekor Qilish",
     save: "Saqlash",
-    saving: "Saqlanmoqda..."
+    saving: "Saqlanmoqda...",
+    theme: "Mavzu (Dark/Light)",
+    navigation: "Navigatsiya"
   },
   ru: {
     store: "Магазин",
@@ -135,7 +138,7 @@ const TRANSLATIONS = {
     adminPanel: "Админ Панель",
     addCard: "Добавить Карточку",
     editCard: "Редактировать Карточку",
-    login: "Вход / Рег",
+    login: "Вход",
     loginTitle: "Вход в Систему",
     registerTitle: "Регистрация",
     welcomeAdmin: "Добро пожаловать, Админ Бехруз!",
@@ -150,13 +153,15 @@ const TRANSLATIONS = {
     addToCartBtn: "Добавить в Корзину",
     cancel: "Отмена",
     save: "Сохранить",
-    saving: "Сохранение..."
+    saving: "Сохранение...",
+    theme: "Тема (Темная/Светлая)",
+    navigation: "Навигация"
   }
 };
 
-const RANDOM_SELLERS = ["GentlmeN Store", "CyberX Official", "Bexruz Digital", "Peo Gamers", "ProSeller UZ"];
-const RANDOM_NAMES = ["Bexruz", "Muhiddin", "Sardor", "Jasur", "Diyorbek", "Gentlemen"];
-const RANDOM_PHONES = ["+998 90 123 45 67", "+998 93 987 65 43", "+998 97 455 11 22", "+998 91 333 88 99", "+998 97 505 00 05", "+998 99 927 07 55 "];
+const RANDOM_SELLERS = ["GentlmeN Store", "CyberX Official", "Bexruz Digital", "Samina Games", "ProSeller UZ"];
+const RANDOM_NAMES = ["Bexruz", "Muhiddin", "Sardor", "Jasur", "Diyorbek"];
+const RANDOM_PHONES = ["+998 90 123 45 67", "+998 93 987 65 43", "+998 97 455 11 22", "+998 91 333 88 99"];
 
 const DEFAULT_PRODUCTS = [
   {
@@ -166,7 +171,8 @@ const DEFAULT_PRODUCTS = [
     value: "300",
     category: "Game Currency",
     img: "https://i.ytimg.com/vi/F7sZrHxgw8o/sddefault.jpg",
-    isGemType: true
+    isGemType: true,
+    gameType: "supercell"
   },
   {
     id: "def-cr-1",
@@ -174,8 +180,9 @@ const DEFAULT_PRODUCTS = [
     about: "Clash Royale o'yini uchun rasmiy Supercell ID orqali tezkor Gems va Chest to'plamlari.",
     value: "350",
     category: "Game Currency",
-    img: "https://skycoach.gg/storage/uploads/products/clash-royale-gems1752827282_picture_item_small.png",
-    isGemType: true
+    img: "https://play-lh.googleusercontent.com/rIv1R-eOfC2O_u2S8E1pA9z0_Z4jU9G-B_7Xp_9JkZf0_S9_Q_q-x-a_x-a",
+    isGemType: true,
+    gameType: "supercell"
   },
   {
     id: "def-cr-2",
@@ -183,8 +190,9 @@ const DEFAULT_PRODUCTS = [
     about: "Clash Royale joriy mavsumi uchun olmos (Diamond) va oltin (Gold) Pass Royale obunasi.",
     value: "145000",
     category: "Digital Services",
-    img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQjLAQBTJlfTefPhOO2FZWC_1ZVq2i5dA5ctOsLTPcZEg&s=10",
-    isGemType: false
+    img: "https://clashroyale.com/uploaded-images/pass-royale-season.jpg",
+    isGemType: false,
+    gameType: "supercell"
   },
   {
     id: "def-pubg",
@@ -192,8 +200,9 @@ const DEFAULT_PRODUCTS = [
     about: "PUBG Mobile uchun Player ID orqali tezkor va xavfsiz Unknown Cash (UC) to'ldirish.",
     value: "160",
     category: "Game Currency",
-    img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSl35W-fF94BkJ-7dp92knylcGvmkbmhbjJNAnkleCqH3veSnribV-vrp8&s=10",
-    isGemType: true
+    img: "https://images.g2a.com/470x276/1x1x0/pubg-mobile-60-uc-key-global-i10000171221001",
+    isGemType: true,
+    gameType: "standard"
   },
   {
     id: "def-val",
@@ -201,17 +210,19 @@ const DEFAULT_PRODUCTS = [
     about: "Riot Games Valorant o'yini uchun rasmiy VP kodlari va battle pass hisoblari.",
     value: "110000",
     category: "Game Currency",
-    img: "https://static.wixstatic.com/media/75a354_9d847b8c81d04dfda8a63bce868d6b34~mv2.jpg/v1/fill/w_1600,h_900,al_c/75a354_9d847b8c81d04dfda8a63bce868d6b34~mv2.jpg https://cdn1.epicgames.com/offer/cbd5b0AD9E884242B101D0B708577F17/EGS_VALORANT_RiotGames_S1_2560x1440-1e24749f992f-b44c845b4",
-    isGemType: false
+    img: "https://cdn1.epicgames.com/offer/cbd5b0AD9E884242B101D0B708577F17/EGS_VALORANT_RiotGames_S1_2560x1440-1e24749f992f-b44c845b4",
+    isGemType: false,
+    gameType: "account"
   },
   {
     id: "def-2",
     Name: "CS2 Prime Status",
     about: "Counter-Strike 2 o'yini uchun rasmiy Prime Status va haftalik skin sovg'alari.",
-    value: "180000",
+    value: "165000",
     category: "Accounts",
     img: "https://images.g2a.com/470x276/1x1x0/counter-strike-global-offensive-prime-status-upgrade-steam-gift-global-i10000016291010/3fd153129c424adab385a9fc",
-    isGemType: false
+    isGemType: false,
+    gameType: "account"
   },
   {
     id: "def-3",
@@ -220,7 +231,8 @@ const DEFAULT_PRODUCTS = [
     value: "180000",
     category: "Game Keys",
     img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSxLGhTGfbLmOJzwYuqCVGTZKjna_IzJ_WQuFSkhEwP0A&s=10",
-    isGemType: false
+    isGemType: false,
+    gameType: "standard"
   },
   {
     id: "def-4",
@@ -229,7 +241,8 @@ const DEFAULT_PRODUCTS = [
     value: "120",
     category: "Game Currency",
     img: "https://store-images.s-microsoft.com/image/apps.61456.64165482222602965.498fd674-a4bb-4f4c-a928-73fa2e98f25f.92841ccf-fdcf-493b-82d6-5ae1c51f03ab?q=90&w=480&h=270",
-    isGemType: true
+    isGemType: true,
+    gameType: "standard"
   },
   {
     id: "def-5",
@@ -238,7 +251,8 @@ const DEFAULT_PRODUCTS = [
     value: "135000",
     category: "Digital Services",
     img: "https://cdn.dlcompare.com/others_jpg/upload/news/image/en-new-valve-guidelines-suggest-0fbf22a7-image-0fbf228a.jpg.webp",
-    isGemType: false
+    isGemType: false,
+    gameType: "account"
   },
   {
     id: "def-6",
@@ -247,7 +261,8 @@ const DEFAULT_PRODUCTS = [
     value: "220000",
     category: "Digital Services",
     img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQhmPb8CUD3KLdz-QYaPFq7SKgCPOJjDaCBTuoTAtJnWp3VSLhtPUXbatha&s=10",
-    isGemType: false
+    isGemType: false,
+    gameType: "account"
   }
 ];
 
@@ -260,6 +275,7 @@ export default function Page() {
   const [products, setProducts] = useState(DEFAULT_PRODUCTS);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -657,33 +673,37 @@ export default function Page() {
   const selectCategoryFromCard = (categoryName) => {
     setSelectedCategory(categoryName);
     setActiveTab('store');
+    setIsMobileMenuOpen(false);
   };
 
   return (
-    <div className={`min-h-screen transition-colors duration-300 font-sans tracking-wide pb-20 md:pb-0 ${darkMode ? 'bg-[#0B0F17] text-gray-100' : 'bg-gray-100 text-gray-900'}`}>
+    <div className={`min-h-screen transition-colors duration-300 font-sans tracking-wide ${darkMode ? 'bg-[#0B0F17] text-gray-100' : 'bg-gray-100 text-gray-900'}`}>
 
       {toastMessage && (
-        <div className="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-50 bg-emerald-500 text-black px-4 py-2.5 md:px-5 md:py-3 rounded-2xl shadow-2xl font-black text-xs md:text-sm flex items-center gap-2 animate-bounce">
+        <div className="fixed bottom-6 right-4 md:right-6 z-50 bg-emerald-500 text-black px-4 py-2.5 md:px-5 md:py-3 rounded-2xl shadow-2xl font-black text-xs md:text-sm flex items-center gap-2 animate-bounce">
           <CheckCircle className="w-5 h-5" />
           {toastMessage}
         </div>
       )}
 
+      {/* HEADER / NAVBAR */}
       <header className={`sticky top-0 z-40 backdrop-blur-md border-b transition-colors ${darkMode ? 'bg-[#0B0F17]/90 border-gray-800' : 'bg-white/90 border-gray-200'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 md:h-20 flex items-center justify-between gap-2">
           
-          <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setActiveTab('store')}>
-            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center overflow-hidden">
+          {/* LOGO */}
+          <div className="flex items-center gap-2 md:gap-2.5 cursor-pointer" onClick={() => setActiveTab('store')}>
+            <div className="w-9 h-9 md:w-12 md:h-12 rounded-xl flex items-center justify-center overflow-hidden transition-transform duration-300 hover:scale-105">
               <img src="/logo.svg" alt="CyberX Logo" className="w-full h-full object-contain" />
             </div>
             <div>
-              <span className="text-xl md:text-2xl font-black tracking-wider bg-gradient-to-r from-emerald-500 via-orange-500 to-amber-500 bg-clip-text text-transparent">
+              <span className="text-lg md:text-2xl font-black tracking-wider bg-gradient-to-r from-emerald-500 via-orange-500 to-amber-500 bg-clip-text text-transparent">
                 CYBERX
               </span>
-              <span className="text-[9px] md:text-[10px] block text-gray-400 font-bold tracking-widest uppercase">Digital Store</span>
+              <span className="text-[8px] md:text-[10px] block text-gray-400 font-bold tracking-widest uppercase">Digital Store</span>
             </div>
           </div>
 
+          {/* DESKTOP NAV MENU */}
           <nav className={`hidden lg:flex items-center gap-1 p-1.5 rounded-2xl border ${darkMode ? 'bg-gray-900/60 border-gray-800' : 'bg-gray-200 border-gray-300'}`}>
             {[
               { id: 'store', label: t.store, icon: Gamepad2 },
@@ -696,7 +716,7 @@ export default function Page() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black uppercase transition-all ${
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black uppercase transition-all duration-300 hover:scale-105 ${
                     activeTab === tab.id 
                       ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-black shadow-md' 
                       : darkMode ? 'text-gray-400 hover:text-white' : 'text-gray-700 hover:text-black'
@@ -719,45 +739,50 @@ export default function Page() {
             </a>
           </nav>
 
-          <div className="flex items-center gap-2 md:gap-3">
+          {/* RIGHT ACTIONS (UZ/RU, CART, REGISTER, BURGER) */}
+          <div className="flex items-center gap-1.5 md:gap-3">
+            {/* UZ / RU SWITCHER */}
             <div 
               onClick={() => setLang(lang === 'uz' ? 'ru' : 'uz')}
-              className="relative w-20 md:w-24 h-9 md:h-11 p-1 rounded-2xl bg-gradient-to-r from-fuchsia-300/40 via-purple-300/30 to-fuchsia-300/40 border-2 border-fuchsia-300 cursor-pointer shadow-lg hover:border-purple-400 transition-all duration-500 flex items-center justify-between select-none"
+              className="relative w-16 md:w-24 h-8 md:h-11 p-0.5 md:p-1 rounded-2xl bg-gradient-to-r from-fuchsia-300/40 via-purple-300/30 to-fuchsia-300/40 border-2 border-fuchsia-300 cursor-pointer shadow-lg hover:border-purple-400 transition-all duration-300 flex items-center justify-between select-none"
               title="Tilni o'zgartirish / Сменить язык"
             >
               <div 
-                className={`absolute top-1 bottom-1 w-8 md:w-10 rounded-xl bg-gradient-to-r from-emerald-500 to-orange-500 shadow-md transition-all duration-500 ease-in-out ${
-                  lang === 'uz' ? 'left-1' : 'left-[42px] md:left-[48px]'
+                className={`absolute top-0.5 bottom-0.5 md:top-1 md:bottom-1 w-7 md:w-10 rounded-xl bg-gradient-to-r from-emerald-500 to-orange-500 shadow-md transition-all duration-300 ease-in-out ${
+                  lang === 'uz' ? 'left-0.5 md:left-1' : 'left-[33px] md:left-[48px]'
                 }`}
               />
 
-              <span className={`relative z-10 w-8 md:w-10 text-center text-[10px] md:text-xs font-black tracking-wider transition-colors duration-500 ${lang === 'uz' ? 'text-black' : 'text-gray-300'}`}>
+              <span className={`relative z-10 w-7 md:w-10 text-center text-[9px] md:text-xs font-black tracking-wider transition-colors duration-300 ${lang === 'uz' ? 'text-black' : 'text-gray-300'}`}>
                 UZ
               </span>
-              <span className={`relative z-10 w-8 md:w-10 text-center text-[10px] md:text-xs font-black tracking-wider transition-colors duration-500 ${lang === 'ru' ? 'text-black' : 'text-gray-300'}`}>
+              <span className={`relative z-10 w-7 md:w-10 text-center text-[9px] md:text-xs font-black tracking-wider transition-colors duration-300 ${lang === 'ru' ? 'text-black' : 'text-gray-300'}`}>
                 RU
               </span>
             </div>
 
+            {/* DESKTOP DARK MODE BUTTON */}
             <button
               onClick={toggleDarkMode}
-              className={`p-2 md:p-2.5 rounded-xl border hover:scale-105 shadow-md flex items-center justify-center transition-all ${darkMode ? 'bg-gray-900 border-gray-800 text-amber-400' : 'bg-gray-200 border-gray-300 text-indigo-600'}`}
+              className={`hidden md:flex p-2.5 rounded-xl border hover:scale-105 shadow-md items-center justify-center transition-all ${darkMode ? 'bg-gray-900 border-gray-800 text-amber-400' : 'bg-gray-200 border-gray-300 text-indigo-600'}`}
             >
-              {darkMode ? <Sun className="w-4 h-4 md:w-5 md:h-5" /> : <Moon className="w-4 h-4 md:w-5 md:h-5" />}
+              {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
 
+            {/* CART BUTTON */}
             <button
               onClick={() => setIsCartOpen(true)}
               className={`relative p-2 md:p-2.5 rounded-xl border hover:scale-105 shadow-md transition-all ${darkMode ? 'bg-gray-900 border-gray-800 text-emerald-400' : 'bg-gray-200 border-gray-300 text-emerald-600'}`}
             >
               <ShoppingBag className="w-4 h-4 md:w-5 md:h-5" />
               {cart.length > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 bg-orange-500 text-black font-extrabold text-[10px] md:text-xs w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center border-2 border-white dark:border-[#0B0F17]">
+                <span className="absolute -top-1.5 -right-1.5 bg-orange-500 text-black font-extrabold text-[9px] md:text-xs w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center border-2 border-white dark:border-[#0B0F17]">
                   {cart.length}
                 </span>
               )}
             </button>
 
+            {/* USER LOGIN / REGISTER */}
             {user ? (
               <div className="flex items-center gap-1.5">
                 {user.isAdmin && (
@@ -772,9 +797,9 @@ export default function Page() {
                     {t.adminPanel}
                   </button>
                 )}
-                <div className={`flex items-center gap-1.5 border px-2.5 py-1 md:px-3 md:py-1.5 rounded-xl ${darkMode ? 'bg-gray-900 border-gray-800' : 'bg-gray-200 border-gray-300'}`}>
+                <div className={`flex items-center gap-1.5 border px-2 py-1 md:px-3 md:py-1.5 rounded-xl ${darkMode ? 'bg-gray-900 border-gray-800' : 'bg-gray-200 border-gray-300'}`}>
                   <User className="w-3.5 h-3.5 md:w-4 md:h-4 text-emerald-500" />
-                  <span className="text-[10px] md:text-xs font-extrabold uppercase truncate max-w-[60px] md:max-w-none">{user.userName}</span>
+                  <span className="text-[10px] md:text-xs font-extrabold uppercase truncate max-w-[50px] md:max-w-none">{user.userName}</span>
                   <button onClick={() => setUser(null)} className="text-gray-400 hover:text-red-500 ml-0.5">
                     <LogOut className="w-3.5 h-3.5" />
                   </button>
@@ -783,40 +808,116 @@ export default function Page() {
             ) : (
               <button
                 onClick={() => { setAuthMode('login'); setAuthModal(true); }}
-                className="flex items-center gap-1 px-3 py-2 md:px-4 md:py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-black font-black text-[10px] md:text-xs uppercase hover:opacity-90 shadow-lg shadow-emerald-500/20"
+                className="flex items-center gap-1 px-2.5 py-1.5 md:px-4 md:py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-black font-black text-[10px] md:text-xs uppercase hover:opacity-90 shadow-lg shadow-emerald-500/20 transition-transform active:scale-95"
               >
                 <Lock className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">{t.login}</span>
+                <span>{t.login}</span>
               </button>
             )}
+
+            {/* TELEFONDA BURGER MENU TUGMASI */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className={`lg:hidden p-2 rounded-xl border active:scale-95 transition-all ${
+                darkMode ? 'bg-gray-900 border-gray-800 text-emerald-400' : 'bg-gray-200 border-gray-300 text-emerald-600'
+              }`}
+            >
+              {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
         </div>
       </header>
 
-      <div className={`lg:hidden fixed bottom-0 left-0 right-0 z-40 border-t backdrop-blur-lg p-2 flex items-center justify-around ${darkMode ? 'bg-[#0B0F17]/95 border-gray-800' : 'bg-white/95 border-gray-200'}`}>
-        {[
-          { id: 'store', label: t.store, icon: Gamepad2 },
-          { id: 'categories', label: t.categories, icon: SlidersHorizontal },
-          { id: 'deals', label: t.deals, icon: Flame },
-          { id: 'orders', label: t.orders, icon: PackageCheck },
-        ].map(tab => {
-          const IconComp = tab.icon;
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex flex-col items-center gap-1 p-1.5 rounded-xl text-[10px] font-black uppercase transition-all ${
-                isActive ? 'text-emerald-500 scale-105' : 'text-gray-400'
-              }`}
-            >
-              <IconComp className="w-5 h-5" />
-              <span>{tab.label}</span>
-            </button>
-          );
-        })}
-      </div>
+      {/* TELEFONDA BURGER MENU SLIDE-IN MODAL/PANEL */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden bg-black/80 backdrop-blur-md flex justify-end animate-in fade-in duration-200">
+          <div className={`w-4/5 max-w-sm h-full p-6 border-l shadow-2xl flex flex-col justify-between animate-in slide-in-from-right duration-300 ${
+            darkMode ? 'bg-[#0B0F17] border-gray-800 text-gray-100' : 'bg-white border-gray-200 text-gray-900'
+          }`}>
+            <div>
+              <div className="flex items-center justify-between pb-4 border-b border-gray-800 mb-6">
+                <div className="flex items-center gap-2">
+                  <img src="/logo.svg" className="w-8 h-8" />
+                  <span className="font-black text-lg text-emerald-500">CYBERX</span>
+                </div>
+                <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-gray-400 hover:text-white">
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
 
+              {/* NAVİGATSİYA BO'LIMLARI */}
+              <div className="space-y-2 mb-6">
+                <span className="text-[10px] font-black uppercase text-gray-500 block mb-2">{t.navigation}</span>
+                {[
+                  { id: 'store', label: t.store, icon: Gamepad2 },
+                  { id: 'categories', label: t.categories, icon: SlidersHorizontal },
+                  { id: 'deals', label: t.deals, icon: Flame },
+                  { id: 'orders', label: t.orders, icon: PackageCheck },
+                ].map(tab => {
+                  const IconComp = tab.icon;
+                  const isActive = activeTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => { setActiveTab(tab.id); setIsMobileMenuOpen(false); }}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-black uppercase transition-all ${
+                        isActive
+                          ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-black shadow-lg shadow-emerald-500/20'
+                          : darkMode ? 'bg-gray-900/60 text-gray-300' : 'bg-gray-100 text-gray-700'
+                      }`}
+                    >
+                      <IconComp className="w-4 h-4" />
+                      {tab.label}
+                    </button>
+                  );
+                })}
+
+                {user && user.isAdmin && (
+                  <button
+                    onClick={() => { setActiveTab('admin'); setIsMobileMenuOpen(false); }}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-black uppercase bg-orange-500/10 text-orange-500 border border-orange-500/30"
+                  >
+                    <SlidersHorizontal className="w-4 h-4" />
+                    {t.adminPanel}
+                  </button>
+                )}
+
+                <a
+                  href="https://karen-ai-ten.vercel.app/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-black uppercase text-orange-500 bg-orange-500/10 border border-orange-500/30"
+                >
+                  <Sparkles className="w-4 h-4 text-orange-500 animate-pulse" />
+                  Help by Karen
+                </a>
+              </div>
+
+              {/* DARK MODE SWITCHER IN BURGER MENU */}
+              <div className="pt-4 border-t border-gray-800">
+                <span className="text-[10px] font-black uppercase text-gray-500 block mb-3">{t.theme}</span>
+                <button
+                  onClick={toggleDarkMode}
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl text-xs font-black border ${
+                    darkMode ? 'bg-gray-900 border-gray-800 text-amber-400' : 'bg-gray-100 border-gray-300 text-indigo-600'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                    <span>{darkMode ? "Dark Mode (Tungi)" : "Light Mode (Kunduzgi)"}</span>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <div className="pt-6 border-t border-gray-800 text-center text-[10px] text-gray-500 font-bold">
+              © 2026 CYBERX Digital Store
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* HERO SECTION */}
       {activeTab === 'store' && (
         <section className="relative overflow-hidden py-6 md:py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
           <div className={`border rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden transition-colors ${darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}>
@@ -843,6 +944,7 @@ export default function Page() {
         </section>
       )}
 
+      {/* MAIN CONTENT AREA */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6">
         {activeTab === 'store' && (
           <div>
@@ -851,7 +953,7 @@ export default function Page() {
                 <button
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}
-                  className={`px-4 py-2 md:px-5 md:py-2.5 rounded-xl font-extrabold text-[11px] md:text-xs uppercase tracking-wider whitespace-nowrap ${
+                  className={`px-4 py-2 md:px-5 md:py-2.5 rounded-xl font-extrabold text-[11px] md:text-xs uppercase tracking-wider whitespace-nowrap transition-all duration-300 hover:scale-105 ${
                     selectedCategory === cat
                       ? 'bg-orange-500 text-black shadow-lg shadow-orange-500/20'
                       : darkMode ? 'bg-gray-900 text-gray-400 border border-gray-800' : 'bg-white text-gray-700 border border-gray-200'
@@ -901,7 +1003,7 @@ export default function Page() {
                     </div>
                     <button
                       onClick={() => handleSelectProduct(product)}
-                      className="px-3.5 py-2 md:px-4 md:py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs uppercase flex items-center gap-1.5 shadow-lg shadow-emerald-500/20"
+                      className="px-3.5 py-2 md:px-4 md:py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs uppercase flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 active:scale-95 transition-transform"
                     >
                       <Plus className="w-4 h-4" /> {t.select}
                     </button>
@@ -912,7 +1014,7 @@ export default function Page() {
           </div>
         )}
 
-        {/* --- TOIFALAR (CATEGORIES) MINI CARDLARI MESH SIZDA --- */}
+        {/* TOIFALAR BO'LIMI */}
         {activeTab === 'categories' && (
           <div className="space-y-6">
             <h2 className="text-xl md:text-2xl font-black mb-4 flex items-center gap-2">
@@ -945,6 +1047,7 @@ export default function Page() {
           </div>
         )}
 
+        {/* AKSIYALAR BO'LIMI */}
         {activeTab === 'deals' && (
           <div className="space-y-6 md:space-y-8">
             <div className="text-center max-w-2xl mx-auto mb-6">
@@ -979,7 +1082,7 @@ export default function Page() {
 
                 <button
                   onClick={() => handleSelectProduct(randomDiscountProduct, 20, 0)}
-                  className="w-full py-3 md:py-3.5 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 text-black font-black text-xs uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 hover:opacity-95"
+                  className="w-full py-3 md:py-3.5 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 text-black font-black text-xs uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 hover:opacity-95 active:scale-95 transition-transform"
                 >
                   <Percent className="w-4 h-4" /> {t.buyInDiscount}
                 </button>
@@ -1003,7 +1106,7 @@ export default function Page() {
 
                 <button
                   onClick={() => handleSelectProduct(randomBonusProduct, 0, 5)}
-                  className="w-full py-3 md:py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-black font-black text-xs uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 hover:opacity-95"
+                  className="w-full py-3 md:py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-black font-black text-xs uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 hover:opacity-95 active:scale-95 transition-transform"
                 >
                   <Gift className="w-4 h-4" /> {t.buyInBonus}
                 </button>
@@ -1012,6 +1115,7 @@ export default function Page() {
           </div>
         )}
 
+        {/* BUYURTMALAR BO'LIMI */}
         {activeTab === 'orders' && (
           <div className="space-y-6 max-w-4xl mx-auto">
             <div className="text-center mb-6">
@@ -1063,6 +1167,7 @@ export default function Page() {
           </div>
         )}
 
+        {/* ADMIN PANEL */}
         {activeTab === 'admin' && (
           <div>
             {!user || !user.isAdmin ? (
@@ -1083,7 +1188,7 @@ export default function Page() {
 
                   <button
                     onClick={handleOpenAddModal}
-                    className="px-4 py-2.5 md:px-5 md:py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-black font-extrabold text-xs uppercase tracking-wider rounded-2xl shadow-lg shadow-emerald-500/20 flex items-center gap-2 hover:opacity-90"
+                    className="px-4 py-2.5 md:px-5 md:py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-black font-extrabold text-xs uppercase tracking-wider rounded-2xl shadow-lg shadow-emerald-500/20 flex items-center gap-2 hover:opacity-90 active:scale-95 transition-transform"
                   >
                     <PlusCircle className="w-5 h-5" />
                     {t.addCard}
@@ -1134,7 +1239,7 @@ export default function Page() {
         )}
       </main>
 
-      {/* --- DINAMIK MODAL: O'YIN TURIGA QARAB TURLICHA FORMA MAYDONLARI --- */}
+      {/* DINAMIK MODAL FORMALAR */}
       {selectedProduct && (() => {
         let unitPrice = Number(selectedProduct.value || selectedProduct.price || 50000);
         let qty = Math.max(1, Number(quantityInput) || 1);
@@ -1152,8 +1257,8 @@ export default function Page() {
         const calculatedUsd = (calculatedSom / USD_RATE).toFixed(2);
 
         return (
-          <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-            <div className={`border rounded-3xl max-w-lg w-full p-5 md:p-6 relative shadow-2xl my-auto ${darkMode ? 'bg-[#111827] border-gray-800 text-gray-100' : 'bg-white border-gray-200 text-gray-900'}`}>
+          <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
+            <div className={`border rounded-3xl max-w-lg w-full p-5 md:p-6 relative shadow-2xl my-auto animate-in zoom-in-95 duration-200 ${darkMode ? 'bg-[#111827] border-gray-800 text-gray-100' : 'bg-white border-gray-200 text-gray-900'}`}>
               <button
                 onClick={() => setSelectedProduct(null)}
                 className={`absolute top-4 right-4 p-2 rounded-full ${darkMode ? 'bg-gray-900 text-gray-400 hover:text-white' : 'bg-gray-100 text-gray-600 hover:text-black'}`}
@@ -1189,7 +1294,7 @@ export default function Page() {
                   </div>
                 )}
 
-                {/* 1. SUPERCELL O'YINLARI (Brawl Stars, Clash Royale): Supercell Email va ID */}
+                {/* 1. SUPERCELL O'YINLARI: Supercell Email va ID */}
                 {isSupercell && (
                   <>
                     <div>
@@ -1275,7 +1380,7 @@ export default function Page() {
 
               <button
                 onClick={handleAddToCart}
-                className="w-full py-3.5 rounded-2xl bg-emerald-500 text-black font-extrabold text-sm shadow-lg shadow-emerald-500/20 hover:bg-emerald-400 transition-colors"
+                className="w-full py-3.5 rounded-2xl bg-emerald-500 text-black font-extrabold text-sm shadow-lg shadow-emerald-500/20 hover:bg-emerald-400 active:scale-95 transition-transform"
               >
                 <ShoppingBag className="w-5 h-5 inline mr-2" /> {t.addToCartBtn}
               </button>
@@ -1284,9 +1389,10 @@ export default function Page() {
         );
       })()}
 
+      {/* SAVAT MODALI */}
       {isCartOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex justify-end">
-          <div className={`border-l w-full max-w-md h-full p-5 md:p-6 flex flex-col justify-between shadow-2xl ${darkMode ? 'bg-[#111827] border-gray-800 text-gray-100' : 'bg-white border-gray-200 text-gray-900'}`}>
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex justify-end animate-in fade-in duration-200">
+          <div className={`border-l w-full max-w-md h-full p-5 md:p-6 flex flex-col justify-between shadow-2xl animate-in slide-in-from-right duration-300 ${darkMode ? 'bg-[#111827] border-gray-800 text-gray-100' : 'bg-white border-gray-200 text-gray-900'}`}>
             <div className="flex-1 overflow-y-auto pr-1">
               <div className="flex items-center justify-between pb-4 border-b border-gray-800 mb-4 md:mb-6">
                 <div className="flex items-center gap-2">
@@ -1371,7 +1477,7 @@ export default function Page() {
                 </div>
                 <button
                   onClick={handleCheckout}
-                  className="w-full py-3.5 md:py-4 bg-gradient-to-r from-emerald-500 via-orange-500 to-amber-500 text-black font-extrabold text-sm md:text-base rounded-2xl shadow-xl flex items-center justify-center gap-2 hover:opacity-95 transition-all"
+                  className="w-full py-3.5 md:py-4 bg-gradient-to-r from-emerald-500 via-orange-500 to-amber-500 text-black font-extrabold text-sm md:text-base rounded-2xl shadow-xl flex items-center justify-center gap-2 hover:opacity-95 active:scale-95 transition-transform"
                 >
                   <Send className="w-5 h-5" /> {t.sendOrder}
                 </button>
@@ -1381,9 +1487,10 @@ export default function Page() {
         </div>
       )}
 
+      {/* ADMIN CARD MODAL */}
       {isAdminCardModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className={`border rounded-3xl max-w-lg w-full p-5 md:p-6 relative shadow-2xl animate-in fade-in zoom-in duration-200 ${darkMode ? 'bg-[#111827] border-gray-800 text-gray-100' : 'bg-white border-gray-200 text-gray-900'}`}>
+          <div className={`border rounded-3xl max-w-lg w-full p-5 md:p-6 relative shadow-2xl animate-in fade-in zoom-in-95 duration-200 ${darkMode ? 'bg-[#111827] border-gray-800 text-gray-100' : 'bg-white border-gray-200 text-gray-900'}`}>
             <button
               onClick={() => setIsAdminCardModalOpen(false)}
               className={`absolute top-4 right-4 p-2 rounded-full ${darkMode ? 'bg-gray-900 text-gray-400 hover:text-white' : 'bg-gray-100 text-gray-600 hover:text-black'}`}
@@ -1451,7 +1558,7 @@ export default function Page() {
                 <button
                   type="submit"
                   disabled={submittingCard}
-                  className="px-6 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 text-black font-extrabold rounded-xl text-sm shadow-md"
+                  className="px-6 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 text-black font-extrabold rounded-xl text-sm shadow-md active:scale-95 transition-transform"
                 >
                   {submittingCard ? t.saving : t.save}
                 </button>
@@ -1461,12 +1568,11 @@ export default function Page() {
         </div>
       )}
 
+      {/* AUTH MODAL (LOGIN / REGISTER) */}
       {authModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 [perspective:1000px]">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div
-            className={`border rounded-3xl max-w-md w-full p-6 relative shadow-2xl transition-transform duration-700 [transform-style:preserve-3d] ${
-              authMode === 'register' ? '[transform:rotateY(180deg)]' : ''
-            } ${darkMode ? 'bg-[#111827] border-gray-800 text-gray-100' : 'bg-white border-gray-200 text-gray-900'}`}
+            className={`border rounded-3xl max-w-md w-full p-6 relative shadow-2xl animate-in zoom-in-95 duration-200 ${darkMode ? 'bg-[#111827] border-gray-800 text-gray-100' : 'bg-white border-gray-200 text-gray-900'}`}
           >
             <button
               onClick={() => setAuthModal(false)}
@@ -1477,7 +1583,7 @@ export default function Page() {
               <X className="w-5 h-5" />
             </button>
 
-            <div className="transition-all">
+            <div>
               <div className="text-center mb-6">
                 <h3 className="text-2xl font-black">
                   {authMode === 'login' ? t.loginTitle : t.registerTitle}
@@ -1528,7 +1634,7 @@ export default function Page() {
 
                 <button
                   type="submit"
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 via-orange-500 to-amber-500 text-black font-extrabold text-sm shadow-md hover:opacity-95 transition-all mt-2"
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 via-orange-500 to-amber-500 text-black font-extrabold text-sm shadow-md hover:opacity-95 active:scale-95 transition-transform mt-2"
                 >
                   {authMode === 'login' ? t.loginTitle : t.registerTitle}
                 </button>
@@ -1538,14 +1644,14 @@ export default function Page() {
                 {authMode === 'login' ? (
                   <button
                     onClick={() => { setAuthMode('register'); setAuthError(''); }}
-                    className="text-emerald-500 font-bold text-xs underline hover:text-emerald-400 transition-colors animate-pulse"
+                    className="text-emerald-500 font-bold text-xs underline hover:text-emerald-400 transition-colors"
                   >
                     {t.registerTitle}
                   </button>
                 ) : (
                   <button
                     onClick={() => { setAuthMode('login'); setAuthError(''); }}
-                    className="text-orange-500 font-bold text-xs underline hover:text-orange-400 transition-colors animate-pulse"
+                    className="text-orange-500 font-bold text-xs underline hover:text-orange-400 transition-colors"
                   >
                     {t.loginTitle}
                   </button>
@@ -1556,6 +1662,7 @@ export default function Page() {
         </div>
       )}
 
+      {/* FOOTER */}
       <footer className={`border-t mt-12 md:mt-20 py-6 md:py-8 text-center text-xs text-gray-500 ${darkMode ? 'bg-gray-950 border-gray-800' : 'bg-white border-gray-200'}`}>
         <p>© 2026 CYBERX Digital Store. Barcha huquqlar himoyalangan. Create by GentlmeN</p>
       </footer>
