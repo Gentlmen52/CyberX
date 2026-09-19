@@ -171,8 +171,7 @@ const DEFAULT_PRODUCTS = [
     value: "300",
     category: "Game Currency",
     img: "https://i.ytimg.com/vi/F7sZrHxgw8o/sddefault.jpg",
-    isGemType: true,
-    gameType: "supercell"
+    isGemType: true
   },
   {
     id: "def-cr-1",
@@ -180,9 +179,8 @@ const DEFAULT_PRODUCTS = [
     about: "Clash Royale o'yini uchun rasmiy Supercell ID orqali tezkor Gems va Chest to'plamlari.",
     value: "350",
     category: "Game Currency",
-    img: "https://play-lh.googleusercontent.com/rIv1R-eOfC2O_u2S8E1pA9z0_Z4jU9G-B_7Xp_9JkZf0_S9_Q_q-x-a_x-a",
-    isGemType: true,
-    gameType: "supercell"
+    img: "https://skycoach.gg/storage/uploads/products/clash-royale-gems1752827282_picture_item_small.png",
+    isGemType: true
   },
   {
     id: "def-cr-2",
@@ -190,9 +188,8 @@ const DEFAULT_PRODUCTS = [
     about: "Clash Royale joriy mavsumi uchun olmos (Diamond) va oltin (Gold) Pass Royale obunasi.",
     value: "145000",
     category: "Digital Services",
-    img: "https://clashroyale.com/uploaded-images/pass-royale-season.jpg",
-    isGemType: false,
-    gameType: "supercell"
+    img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQjLAQBTJlfTefPhOO2FZWC_1ZVq2i5dA5ctOsLTPcZEg&s=10",
+    isGemType: false
   },
   {
     id: "def-pubg",
@@ -200,9 +197,8 @@ const DEFAULT_PRODUCTS = [
     about: "PUBG Mobile uchun Player ID orqali tezkor va xavfsiz Unknown Cash (UC) to'ldirish.",
     value: "160",
     category: "Game Currency",
-    img: "https://images.g2a.com/470x276/1x1x0/pubg-mobile-60-uc-key-global-i10000171221001",
-    isGemType: true,
-    gameType: "standard"
+    img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSl35W-fF94BkJ-7dp92knylcGvmkbmhbjJNAnkleCqH3veSnribV-vrp8&s=10",
+    isGemType: true
   },
   {
     id: "def-val",
@@ -210,19 +206,17 @@ const DEFAULT_PRODUCTS = [
     about: "Riot Games Valorant o'yini uchun rasmiy VP kodlari va battle pass hisoblari.",
     value: "110000",
     category: "Game Currency",
-    img: "https://cdn1.epicgames.com/offer/cbd5b0AD9E884242B101D0B708577F17/EGS_VALORANT_RiotGames_S1_2560x1440-1e24749f992f-b44c845b4",
-    isGemType: false,
-    gameType: "account"
+    img: "https://static.wixstatic.com/media/75a354_9d847b8c81d04dfda8a63bce868d6b34~mv2.jpg/v1/fill/w_1600,h_900,al_c/75a354_9d847b8c81d04dfda8a63bce868d6b34~mv2.jpg https://cdn1.epicgames.com/offer/cbd5b0AD9E884242B101D0B708577F17/EGS_VALORANT_RiotGames_S1_2560x1440-1e24749f992f-b44c845b4",
+    isGemType: false
   },
   {
     id: "def-2",
     Name: "CS2 Prime Status",
     about: "Counter-Strike 2 o'yini uchun rasmiy Prime Status va haftalik skin sovg'alari.",
-    value: "165000",
+    value: "180000",
     category: "Accounts",
     img: "https://images.g2a.com/470x276/1x1x0/counter-strike-global-offensive-prime-status-upgrade-steam-gift-global-i10000016291010/3fd153129c424adab385a9fc",
-    isGemType: false,
-    gameType: "account"
+    isGemType: false
   },
   {
     id: "def-3",
@@ -231,8 +225,7 @@ const DEFAULT_PRODUCTS = [
     value: "180000",
     category: "Game Keys",
     img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSxLGhTGfbLmOJzwYuqCVGTZKjna_IzJ_WQuFSkhEwP0A&s=10",
-    isGemType: false,
-    gameType: "standard"
+    isGemType: false
   },
   {
     id: "def-4",
@@ -241,8 +234,7 @@ const DEFAULT_PRODUCTS = [
     value: "120",
     category: "Game Currency",
     img: "https://store-images.s-microsoft.com/image/apps.61456.64165482222602965.498fd674-a4bb-4f4c-a928-73fa2e98f25f.92841ccf-fdcf-493b-82d6-5ae1c51f03ab?q=90&w=480&h=270",
-    isGemType: true,
-    gameType: "standard"
+    isGemType: true
   },
   {
     id: "def-5",
@@ -251,8 +243,7 @@ const DEFAULT_PRODUCTS = [
     value: "135000",
     category: "Digital Services",
     img: "https://cdn.dlcompare.com/others_jpg/upload/news/image/en-new-valve-guidelines-suggest-0fbf22a7-image-0fbf228a.jpg.webp",
-    isGemType: false,
-    gameType: "account"
+    isGemType: false
   },
   {
     id: "def-6",
@@ -261,8 +252,7 @@ const DEFAULT_PRODUCTS = [
     value: "220000",
     category: "Digital Services",
     img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQhmPb8CUD3KLdz-QYaPFq7SKgCPOJjDaCBTuoTAtJnWp3VSLhtPUXbatha&s=10",
-    isGemType: false,
-    gameType: "account"
+    isGemType: false
   }
 ];
 
