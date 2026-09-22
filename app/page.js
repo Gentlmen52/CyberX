@@ -157,7 +157,7 @@ const TRANSLATIONS = {
   }
 };
 
-const RANDOM_SELLERS = ["GentlmeN Store", "CyberX Official", "Bexruz Digital", "Samina Games", "ProSeller UZ"];
+const RANDOM_SELLERS = ["GentlmeN Store", "CyberX Official", "Bexruz Digital","ProSeller UZ", "Sulton Hub"];
 const RANDOM_NAMES = ["Bexruz", "Muhiddin", "Sardor", "Jasur", "Diyorbek"];
 const RANDOM_PHONES = ["+998 90 123 45 67", "+998 93 987 65 43", "+998 97 455 11 22", "+998 91 333 88 99"];
 
