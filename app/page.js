@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import FAQ from '../components/FAQ';
 import {
   ShoppingBag,
   Sparkles,
@@ -20,7 +21,6 @@ import {
   Send,
   Zap,
   SlidersHorizontal,
-  CreditCard,
   PlusCircle,
   Eye,
   EyeOff,
@@ -34,8 +34,8 @@ import {
   Store,
   Mail,
   KeyRound,
-  ArrowRight,
-  Menu
+  Menu,
+  TicketPercent
 } from 'lucide-react';
 
 const MOCK_USERS_API = "https://6aa93829d442cb69d498d71.mockapi.io/ForDemoDay";
@@ -44,12 +44,11 @@ const MOCK_CARDS_API = "https://6aa93829d442cb69d498d71.mockapi.io/cards";
 const TELEGRAM_BOT_TOKEN = "8987756369:AAFLnDGb580xbuBtQI0n1MEsetfQZoEmRhg";
 const TELEGRAM_CHAT_ID = "6570254550";
 
-const USD_RATE = 12800;
+const USD_RATE = 12000;
 
 const TRANSLATIONS = {
   uz: {
     store: "Do'kon",
-    categories: "Toifalar",
     deals: "Aksiyalar",
     orders: "Buyurtmalar",
     searchPlaceholder: "O'yin yoki xizmatni qidirish...",
@@ -104,7 +103,6 @@ const TRANSLATIONS = {
   },
   ru: {
     store: "Магазин",
-    categories: "Категории",
     deals: "Aкции",
     orders: "Заказы",
     searchPlaceholder: "Поиск игр и услуг...",
@@ -278,6 +276,10 @@ export default function Page() {
   const [randomDiscountProduct, setRandomDiscountProduct] = useState(DEFAULT_PRODUCTS[0]);
   const [randomBonusProduct, setRandomBonusProduct] = useState(DEFAULT_PRODUCTS[1]);
 
+  const [promoCode, setPromoCode] = useState('');
+  const [promoApplied, setPromoApplied] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(20539);
+
   const [selectedProduct, setSelectedProduct] = useState(null);
   
   const [emailInput, setEmailInput] = useState('');
@@ -306,6 +308,20 @@ export default function Page() {
   const showToast = (msg) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(''), 3500);
+  };
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft(prev => (prev > 0 ? prev - 1 : 28800));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatTimer = (seconds) => {
+    const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+    const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return `${h}:${m}:${s}`;
   };
 
   useEffect(() => {
@@ -343,7 +359,7 @@ export default function Page() {
         customerName: buyer,
         sellerName: seller,
         phone: phone,
-        date: `19.09.2026, ${12 + i}:${10 + i * 15}`,
+        date: `22.09.2026, ${12 + i}:${10 + i * 15}`,
         totalSom: itemPrice,
         items: [
           {
@@ -395,6 +411,16 @@ export default function Page() {
   useEffect(() => {
     fetchCards();
   }, []);
+
+  const handleApplyPromo = (e) => {
+    e.preventDefault();
+    if (promoCode.trim().toUpperCase() === 'BEXRUZ2026') {
+      setPromoApplied(true);
+      showToast(lang === 'uz' ? "Promo-kod qabul qilindi (-10% chegirma)!" : "Промокод принят (-10% скидка)!");
+    } else {
+      alert(lang === 'uz' ? "Noto'g'ri promo-kod! (To'g'ri kod: BEXRUZ2026)" : "Неверный промокод! (Код: BEXRUZ2026)");
+    }
+  };
 
   const handleOpenAddModal = () => {
     setEditingCardId(null);
@@ -509,8 +535,13 @@ export default function Page() {
     let unitPrice = Number(selectedProduct.value || selectedProduct.price || 50000);
     let qty = Math.max(1, Number(quantityInput) || 1);
 
-    if (selectedProduct.discountPercent) {
-      unitPrice = unitPrice * (1 - selectedProduct.discountPercent / 100);
+    let effectiveDiscount = selectedProduct.discountPercent || 0;
+    if (promoApplied) {
+      effectiveDiscount += 10;
+    }
+
+    if (effectiveDiscount > 0) {
+      unitPrice = unitPrice * (1 - effectiveDiscount / 100);
     }
 
     if (selectedProduct.bonusPercent && (selectedProduct.category === 'Game Currency' || selectedProduct.isGemType)) {
@@ -660,12 +691,6 @@ export default function Page() {
     }
   };
 
-  const selectCategoryFromCard = (categoryName) => {
-    setSelectedCategory(categoryName);
-    setActiveTab('store');
-    setIsMobileMenuOpen(false);
-  };
-
   return (
     <div className={`min-h-screen transition-colors duration-300 font-sans tracking-wide ${darkMode ? 'bg-[#0B0F17] text-gray-100' : 'bg-gray-100 text-gray-900'}`}>
 
@@ -686,7 +711,7 @@ export default function Page() {
               <img src="/logo.svg" alt="CyberX Logo" className="w-full h-full object-contain" />
             </div>
             <div>
-              <span className="text-lg md:text-2xl font-black tracking-wider bg-gradient-to-r from-emerald-500 via-orange-500 to-amber-500 bg-clip-text text-transparent">
+              <span className="text-lg md:text-2xl font-black tracking-wider bg-gradient-to-r from-emerald-400 via-orange-400 to-amber-500 bg-clip-text text-transparent">
                 CYBERX
               </span>
               <span className="text-[8px] md:text-[10px] block text-gray-400 font-bold tracking-widest uppercase">Digital Store</span>
@@ -697,7 +722,6 @@ export default function Page() {
           <nav className={`hidden lg:flex items-center gap-1 p-1.5 rounded-2xl border ${darkMode ? 'bg-gray-900/60 border-gray-800' : 'bg-gray-200 border-gray-300'}`}>
             {[
               { id: 'store', label: t.store, icon: Gamepad2 },
-              { id: 'categories', label: t.categories, icon: SlidersHorizontal },
               { id: 'deals', label: t.deals, icon: Flame },
               { id: 'orders', label: t.orders, icon: PackageCheck },
             ].map(tab => {
@@ -708,7 +732,7 @@ export default function Page() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black uppercase transition-all duration-300 hover:scale-105 ${
                     activeTab === tab.id 
-                      ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-black shadow-md' 
+                      ? 'bg-emerald-500 text-black shadow-md' 
                       : darkMode ? 'text-gray-400 hover:text-white' : 'text-gray-700 hover:text-black'
                   }`}
                 >
@@ -722,14 +746,14 @@ export default function Page() {
               href="https://karen-ai-ten.vercel.app/"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black uppercase text-orange-500 bg-orange-500/10 border border-orange-500/30 hover:bg-orange-500/20 transition-all shadow-sm"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black uppercase text-orange-400 bg-orange-500/10 border border-orange-500/30 hover:bg-orange-500/20 transition-all shadow-sm"
             >
-              <Sparkles className="w-4 h-4 text-orange-500 animate-pulse" />
+              <Sparkles className="w-4 h-4 text-orange-400 animate-pulse" />
               Help by Karen
             </a>
           </nav>
 
-          {/* RIGHT ACTIONS (UZ/RU, CART, REGISTER, BURGER) */}
+          {/* RIGHT ACTIONS */}
           <div className="flex items-center gap-1.5 md:gap-3">
             {/* UZ / RU SWITCHER */}
             <div 
@@ -738,7 +762,7 @@ export default function Page() {
               title="Tilni o'zgartirish / Сменить язык"
             >
               <div 
-                className={`absolute top-0.5 bottom-0.5 md:top-1 md:bottom-1 w-7 md:w-10 rounded-xl bg-gradient-to-r from-emerald-500 to-orange-500 shadow-md transition-all duration-300 ease-in-out ${
+                className={`absolute top-0.5 bottom-0.5 md:top-1 md:bottom-1 w-7 md:w-10 rounded-xl bg-gradient-to-r from-emerald-400 to-orange-400 shadow-md transition-all duration-300 ease-in-out ${
                   lang === 'uz' ? 'left-0.5 md:left-1' : 'left-[33px] md:left-[48px]'
                 }`}
               />
@@ -751,7 +775,7 @@ export default function Page() {
               </span>
             </div>
 
-            {/* DESKTOP DARK MODE BUTTON */}
+            {/* DARK MODE BUTTON */}
             <button
               onClick={toggleDarkMode}
               className={`hidden md:flex p-2.5 rounded-xl border hover:scale-105 shadow-md items-center justify-center transition-all ${darkMode ? 'bg-gray-900 border-gray-800 text-amber-400' : 'bg-gray-200 border-gray-300 text-indigo-600'}`}
@@ -781,14 +805,14 @@ export default function Page() {
                     className={`hidden md:block px-3 py-2 rounded-xl text-xs font-bold border transition-all ${
                       activeTab === 'admin'
                         ? 'bg-orange-500 text-black border-orange-400'
-                        : 'bg-orange-500/10 text-orange-500 border-orange-500/30'
+                        : 'bg-orange-500/10 text-orange-400 border-orange-500/30'
                     }`}
                   >
                     {t.adminPanel}
                   </button>
                 )}
                 <div className={`flex items-center gap-1.5 border px-2 py-1 md:px-3 md:py-1.5 rounded-xl ${darkMode ? 'bg-gray-900 border-gray-800' : 'bg-gray-200 border-gray-300'}`}>
-                  <User className="w-3.5 h-3.5 md:w-4 md:h-4 text-emerald-500" />
+                  <User className="w-3.5 h-3.5 md:w-4 md:h-4 text-emerald-400" />
                   <span className="text-[10px] md:text-xs font-extrabold uppercase truncate max-w-[50px] md:max-w-none">{user.userName}</span>
                   <button onClick={() => setUser(null)} className="text-gray-400 hover:text-red-500 ml-0.5">
                     <LogOut className="w-3.5 h-3.5" />
@@ -796,16 +820,17 @@ export default function Page() {
                 </div>
               </div>
             ) : (
+              /* YANGILANGAN ANIQ VA ODDIY ROQ KIRISH TUGMASI */
               <button
                 onClick={() => { setAuthMode('login'); setAuthModal(true); }}
-                className="flex items-center gap-1 px-2.5 py-1.5 md:px-4 md:py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-black font-black text-[10px] md:text-xs uppercase hover:opacity-90 shadow-lg shadow-emerald-500/20 transition-transform active:scale-95"
+                className="flex items-center gap-1.5 px-3 py-2 md:px-4 md:py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-black text-[10px] md:text-xs uppercase shadow-md transition-all active:scale-95"
               >
                 <Lock className="w-3.5 h-3.5" />
                 <span>{t.login}</span>
               </button>
             )}
 
-            {/* TELEFONDA BURGER MENU TUGMASI */}
+            {/* BURGER MENU BUTTON */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className={`lg:hidden p-2 rounded-xl border active:scale-95 transition-all ${
@@ -818,7 +843,7 @@ export default function Page() {
         </div>
       </header>
 
-      {/* TELEFONDA BURGER MENU SLIDE-IN MODAL/PANEL */}
+      {/* MOBILE MENU */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-50 lg:hidden bg-black/80 backdrop-blur-md flex justify-end animate-in fade-in duration-200">
           <div className={`w-4/5 max-w-sm h-full p-6 border-l shadow-2xl flex flex-col justify-between animate-in slide-in-from-right duration-300 ${
@@ -828,19 +853,17 @@ export default function Page() {
               <div className="flex items-center justify-between pb-4 border-b border-gray-800 mb-6">
                 <div className="flex items-center gap-2">
                   <img src="/logo.svg" className="w-8 h-8" />
-                  <span className="font-black text-lg text-emerald-500">CYBERX</span>
+                  <span className="font-black text-lg text-emerald-400">CYBERX</span>
                 </div>
                 <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-gray-400 hover:text-white">
                   <X className="w-6 h-6" />
                 </button>
               </div>
 
-              {/* NAVİGATSİYA BO'LIMLARI */}
               <div className="space-y-2 mb-6">
                 <span className="text-[10px] font-black uppercase text-gray-500 block mb-2">{t.navigation}</span>
                 {[
                   { id: 'store', label: t.store, icon: Gamepad2 },
-                  { id: 'categories', label: t.categories, icon: SlidersHorizontal },
                   { id: 'deals', label: t.deals, icon: Flame },
                   { id: 'orders', label: t.orders, icon: PackageCheck },
                 ].map(tab => {
@@ -852,7 +875,7 @@ export default function Page() {
                       onClick={() => { setActiveTab(tab.id); setIsMobileMenuOpen(false); }}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-black uppercase transition-all ${
                         isActive
-                          ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-black shadow-lg shadow-emerald-500/20'
+                          ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20'
                           : darkMode ? 'bg-gray-900/60 text-gray-300' : 'bg-gray-100 text-gray-700'
                       }`}
                     >
@@ -865,7 +888,7 @@ export default function Page() {
                 {user && user.isAdmin && (
                   <button
                     onClick={() => { setActiveTab('admin'); setIsMobileMenuOpen(false); }}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-black uppercase bg-orange-500/10 text-orange-500 border border-orange-500/30"
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-black uppercase bg-orange-500/10 text-orange-400 border border-orange-500/30"
                   >
                     <SlidersHorizontal className="w-4 h-4" />
                     {t.adminPanel}
@@ -876,14 +899,13 @@ export default function Page() {
                   href="https://karen-ai-ten.vercel.app/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-black uppercase text-orange-500 bg-orange-500/10 border border-orange-500/30"
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-black uppercase text-orange-400 bg-orange-500/10 border border-orange-500/30"
                 >
-                  <Sparkles className="w-4 h-4 text-orange-500 animate-pulse" />
+                  <Sparkles className="w-4 h-4 text-orange-400 animate-pulse" />
                   Help by Karen
                 </a>
               </div>
 
-              {/* DARK MODE SWITCHER IN BURGER MENU */}
               <div className="pt-4 border-t border-gray-800">
                 <span className="text-[10px] font-black uppercase text-gray-500 block mb-3">{t.theme}</span>
                 <button
@@ -912,11 +934,11 @@ export default function Page() {
         <section className="relative overflow-hidden py-6 md:py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
           <div className={`border rounded-3xl p-6 sm:p-12 shadow-2xl relative overflow-hidden transition-colors ${darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}>
             <div className="max-w-2xl relative z-10">
-              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 text-[10px] md:text-xs font-black uppercase tracking-widest mb-3 md:mb-4">
+              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] md:text-xs font-black uppercase tracking-widest mb-3 md:mb-4">
                 <Zap className="w-3.5 h-3.5" /> {t.heroSubtitle}
               </span>
               <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight mb-3 md:mb-4">
-                {t.heroTitle1}<span className="bg-gradient-to-r from-emerald-500 to-orange-500 bg-clip-text text-transparent">{t.heroTitle2}</span>
+                {t.heroTitle1}<span className="bg-gradient-to-r from-emerald-400 to-orange-400 bg-clip-text text-transparent">{t.heroTitle2}</span>
               </h1>
 
               <div className="relative max-w-lg mt-4 md:mt-6">
@@ -938,22 +960,29 @@ export default function Page() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6">
         {activeTab === 'store' && (
           <div>
+            {/* KATEGORIYA TUGMALARI */}
             <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-6 md:mb-8 no-scrollbar">
-              {['All', 'Game Currency', 'Game Keys', 'Accounts', 'Digital Services'].map(cat => (
-                <button
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`px-4 py-2 md:px-5 md:py-2.5 rounded-xl font-extrabold text-[11px] md:text-xs uppercase tracking-wider whitespace-nowrap transition-all duration-300 hover:scale-105 ${
-                    selectedCategory === cat
-                      ? 'bg-orange-500 text-black shadow-lg shadow-orange-500/20'
-                      : darkMode ? 'bg-gray-900 text-gray-400 border border-gray-800' : 'bg-white text-gray-700 border border-gray-200'
-                  }`}
-                >
-                  {cat === 'All' ? t.allCategories : cat}
-                </button>
-              ))}
+              {['All', 'Game Currency', 'Game Keys', 'Accounts', 'Digital Services'].map(cat => {
+                const isSelected = selectedCategory === cat;
+                return (
+                  <button
+                    key={cat}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider whitespace-nowrap transition-all duration-300 hover:scale-105 cursor-pointer ${
+                      isSelected
+                        ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-black shadow-[0_0_20px_rgba(249,115,22,0.4)] border border-amber-400 font-extrabold'
+                        : darkMode
+                          ? 'bg-gray-800/80 text-gray-200 border border-gray-700 hover:border-orange-500 hover:text-white hover:bg-gray-800'
+                          : 'bg-white text-gray-800 border border-gray-300 shadow-sm hover:border-orange-500'
+                    }`}
+                  >
+                    {cat === 'All' ? t.allCategories : cat}
+                  </button>
+                );
+              })}
             </div>
 
+            {/* MAHSULOTLAR TARMOG'I */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {filteredProducts.map(product => (
                 <div
@@ -967,15 +996,11 @@ export default function Page() {
                         alt={product.Name || product.title}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />
-                      {product.category && (
-                        <span className="absolute bottom-3 left-3 bg-orange-500 text-black font-black text-[9px] md:text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-lg">
-                          {product.category}
-                        </span>
-                      )}
+                      
                     </div>
 
                     <div className="p-4 md:p-5">
-                      <h3 className="text-lg md:text-xl font-black group-hover:text-emerald-500 transition-colors mb-1.5">
+                      <h3 className="text-lg md:text-xl font-black group-hover:text-emerald-400 transition-colors mb-1.5">
                         {product.Name || product.title}
                       </h3>
                       <p className="text-gray-400 text-xs font-medium line-clamp-2 mb-3 leading-relaxed">
@@ -987,13 +1012,15 @@ export default function Page() {
                   <div className={`p-4 md:p-5 pt-0 flex items-center justify-between border-t mt-auto ${darkMode ? 'border-gray-800/50' : 'border-gray-100'}`}>
                     <div>
                       <span className="text-[9px] md:text-[10px] text-gray-500 block font-bold uppercase tracking-wider">{t.price}</span>
-                      <span className="text-base md:text-lg font-black text-emerald-500">
+                      <span className="text-base md:text-lg font-black text-emerald-400">
                         {Number(product.value || product.price || 50000).toLocaleString()} SO'M
                       </span>
                     </div>
+
+                    {/* YANGILANGAN ANIQ VA YORQIN TANLASH TUGMASI */}
                     <button
                       onClick={() => handleSelectProduct(product)}
-                      className="px-3.5 py-2 md:px-4 md:py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs uppercase flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 active:scale-95 transition-transform"
+                      className="px-3.5 py-2 md:px-4 md:py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-black text-xs uppercase flex items-center gap-1.5 shadow-md active:scale-95 transition-all"
                     >
                       <Plus className="w-4 h-4" /> {t.select}
                     </button>
@@ -1001,47 +1028,17 @@ export default function Page() {
                 </div>
               ))}
             </div>
-          </div>
-        )}
 
-        {/* TOIFALAR BO'LIMI */}
-        {activeTab === 'categories' && (
-          <div className="space-y-6">
-            <h2 className="text-xl md:text-2xl font-black mb-4 flex items-center gap-2">
-              <SlidersHorizontal className="w-6 h-6 text-emerald-500" /> {t.categories}
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-              {[
-                { name: 'Game Currency', label: 'Game Currency', count: 'Brawl Stars, Clash Royale, PUBG', icon: Zap },
-                { name: 'Game Keys', label: 'Game Keys', count: 'Steam, Minecraft, CS2', icon: Gamepad2 },
-                { name: 'Accounts', label: 'Accounts', count: 'CS2 Prime, Valorant', icon: User },
-                { name: 'Digital Services', label: 'Digital Services', count: 'Discord Nitro, Telegram Pass', icon: CreditCard },
-              ].map((cat, idx) => {
-                const IconComp = cat.icon;
-                return (
-                  <div 
-                    key={idx} 
-                    onClick={() => selectCategoryFromCard(cat.name)}
-                    className={`group border rounded-3xl p-5 md:p-6 shadow-md cursor-pointer transition-all duration-300 hover:border-emerald-500 hover:-translate-y-1 ${darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <IconComp className="w-8 h-8 text-orange-500 group-hover:scale-110 transition-transform" />
-                      <ArrowRight className="w-5 h-5 text-gray-500 group-hover:text-emerald-500 transition-colors" />
-                    </div>
-                    <h3 className="text-base md:text-lg font-black mb-1 group-hover:text-emerald-400 transition-colors">{cat.label}</h3>
-                    <p className="text-xs text-gray-400 font-semibold">{cat.count}</p>
-                  </div>
-                );
-              })}
-            </div>
+            {/* TILGA BOG'LANGAN FAQ */}
+            <FAQ lang={lang} />
           </div>
         )}
 
         {/* AKSIYALAR BO'LIMI */}
         {activeTab === 'deals' && (
-          <div className="space-y-6 md:space-y-8">
+          <div className="space-y-6 md:space-y-8 max-w-5xl mx-auto">
             <div className="text-center max-w-2xl mx-auto mb-6">
-              <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-orange-500/10 text-orange-500 font-black text-[10px] md:text-xs uppercase tracking-widest border border-orange-500/30">
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-orange-500/10 text-orange-400 font-black text-[10px] md:text-xs uppercase tracking-widest border border-orange-500/30 animate-pulse">
                 <Flame className="w-4 h-4" /> {t.limitedOffers}
               </span>
               <h2 className="text-2xl md:text-3xl font-black mt-2 tracking-tight">{t.specialDealsTitle}</h2>
@@ -1049,24 +1046,41 @@ export default function Page() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-              <div className={`border rounded-3xl p-5 md:p-6 relative overflow-hidden shadow-2xl flex flex-col justify-between ${darkMode ? 'bg-gradient-to-br from-gray-900 to-gray-950 border-orange-500/30' : 'bg-white border-orange-200'}`}>
-                <div className="absolute top-4 right-4 bg-red-500 text-white text-[9px] md:text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full flex items-center gap-1 shadow-md">
-                  <Clock className="w-3.5 h-3.5" /> {t.discountOffer}
+              {/* 1-AKSIYA */}
+              <div className={`border rounded-3xl p-5 md:p-6 relative overflow-hidden shadow-2xl flex flex-col justify-between hover:border-orange-500 transition-all duration-300 hover:shadow-[0_0_30px_rgba(249,115,22,0.2)] ${darkMode ? 'bg-gradient-to-br from-gray-900 via-gray-900 to-orange-950/20 border-orange-500/30' : 'bg-white border-orange-200'}`}>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="bg-red-500/20 border border-red-500/40 text-red-400 text-[10px] md:text-xs font-black uppercase tracking-wider px-3 py-1.5 rounded-xl flex items-center gap-1.5 animate-pulse">
+                    <Clock className="w-4 h-4" /> 
+                    <span>{lang === 'uz' ? 'Tugashiga:' : 'До конца:'} <b>{formatTimer(timeLeft)}</b></span>
+                  </div>
+                  <span className="bg-red-500 text-white font-black text-xs px-2.5 py-1 rounded-lg shadow-md flex items-center gap-1">
+                    <Percent className="w-3.5 h-3.5" /> 20% OFF
+                  </span>
                 </div>
 
-                <div className="flex gap-4 items-center mb-4 mt-6 md:mt-0">
-                  <img src={randomDiscountProduct.img || randomDiscountProduct.image} className="w-20 h-20 md:w-24 md:h-24 rounded-2xl object-cover border border-gray-800" />
+                <div className="flex gap-4 items-center mb-4">
+                  <img src={randomDiscountProduct.img || randomDiscountProduct.image} className="w-20 h-20 md:w-24 md:h-24 rounded-2xl object-cover border border-gray-800 shadow-md" />
                   <div>
                     <h3 className="text-xl md:text-2xl font-black">{randomDiscountProduct.Name || randomDiscountProduct.title}</h3>
                     <p className="text-xs text-gray-400 mt-1 line-clamp-2">{randomDiscountProduct.about || randomDiscountProduct.description}</p>
                     <div className="mt-2.5 flex items-center gap-2">
-                      <span className="text-lg md:text-xl font-black text-emerald-500">
+                      <span className="text-lg md:text-xl font-black text-emerald-400">
                         {(Number(randomDiscountProduct.value || 50000) * 0.8).toLocaleString()} SO'M
                       </span>
                       <span className="text-xs text-gray-500 line-through font-semibold">
                         {Number(randomDiscountProduct.value || 50000).toLocaleString()} SO'M
                       </span>
                     </div>
+                  </div>
+                </div>
+
+                <div className="mb-4 space-y-1.5">
+                  <div className="flex justify-between text-[11px] font-bold">
+                    <span className="text-orange-400 flex items-center gap-1"><Flame className="w-3.5 h-3.5" /> 82% {lang === 'uz' ? 'sotildi' : 'продано'}</span>
+                    <span className="text-gray-400">{lang === 'uz' ? 'Faqat 9 dona qoldi' : 'Осталось всего 9 шт'}</span>
+                  </div>
+                  <div className="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
+                    <div className="bg-gradient-to-r from-orange-500 to-red-500 h-full w-[82%] rounded-full"></div>
                   </div>
                 </div>
 
@@ -1078,19 +1092,36 @@ export default function Page() {
                 </button>
               </div>
 
-              <div className={`border rounded-3xl p-5 md:p-6 relative overflow-hidden shadow-2xl flex flex-col justify-between ${darkMode ? 'bg-gradient-to-br from-gray-900 to-gray-950 border-emerald-500/30' : 'bg-white border-emerald-200'}`}>
-                <div className="absolute top-4 right-4 bg-emerald-500 text-black text-[9px] md:text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full flex items-center gap-1 shadow-md">
-                  <Gift className="w-3.5 h-3.5" /> {t.bonusOffer}
+              {/* 2-AKSIYA */}
+              <div className={`border rounded-3xl p-5 md:p-6 relative overflow-hidden shadow-2xl flex flex-col justify-between hover:border-emerald-500 transition-all duration-300 hover:shadow-[0_0_30px_rgba(16,185,129,0.2)] ${darkMode ? 'bg-gradient-to-br from-gray-900 via-gray-900 to-emerald-950/20 border-emerald-500/30' : 'bg-white border-emerald-200'}`}>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 text-[10px] md:text-xs font-black uppercase tracking-wider px-3 py-1.5 rounded-xl flex items-center gap-1.5">
+                    <Gift className="w-4 h-4" /> 
+                    <span>{lang === 'uz' ? 'Maxsus Bonus' : 'Спец Бонус'}</span>
+                  </div>
+                  <span className="bg-emerald-500 text-black font-black text-xs px-2.5 py-1 rounded-lg shadow-md flex items-center gap-1">
+                    <Sparkles className="w-3.5 h-3.5" /> +5% EXTRA
+                  </span>
                 </div>
 
-                <div className="flex gap-4 items-center mb-4 mt-6 md:mt-0">
-                  <img src={randomBonusProduct.img || randomBonusProduct.image} className="w-20 h-20 md:w-24 md:h-24 rounded-2xl object-cover border border-gray-800" />
+                <div className="flex gap-4 items-center mb-4">
+                  <img src={randomBonusProduct.img || randomBonusProduct.image} className="w-20 h-20 md:w-24 md:h-24 rounded-2xl object-cover border border-gray-800 shadow-md" />
                   <div>
                     <h3 className="text-xl md:text-2xl font-black">{randomBonusProduct.Name || randomBonusProduct.title}</h3>
                     <p className="text-xs text-gray-400 mt-1 line-clamp-2">{randomBonusProduct.about || randomBonusProduct.description}</p>
                     <p className="text-xs text-emerald-400 font-extrabold mt-2 flex items-center gap-1">
                       <Tag className="w-3.5 h-3.5" /> {t.bonusDetail}
                     </p>
+                  </div>
+                </div>
+
+                <div className="mb-4 space-y-1.5">
+                  <div className="flex justify-between text-[11px] font-bold">
+                    <span className="text-emerald-400 flex items-center gap-1"><Gift className="w-3.5 h-3.5" /> {lang === 'uz' ? 'Bonusli to\'plam' : 'Бонусный набор'}</span>
+                    <span className="text-gray-400">Limit: 50/50</span>
+                  </div>
+                  <div className="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
+                    <div className="bg-emerald-500 h-full w-[65%] rounded-full"></div>
                   </div>
                 </div>
 
@@ -1102,6 +1133,40 @@ export default function Page() {
                 </button>
               </div>
             </div>
+
+            {/* PROMO-KOD BLOKI */}
+            <div className={`p-6 rounded-3xl border shadow-xl ${darkMode ? 'bg-gray-900/90 border-gray-800' : 'bg-white border-gray-200'}`}>
+              <form onSubmit={handleApplyPromo} className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/30 text-orange-400 flex items-center justify-center shrink-0">
+                    <TicketPercent className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h4 className="text-base font-black text-white">{lang === 'uz' ? 'Promo-kodingiz bormi?' : 'Есть промокод?'}</h4>
+                    <p className="text-xs text-gray-400">{lang === 'uz' ? 'Kodni kiriting va qo\'shimcha -10% chegirmaga ega bo\'ling (Kod: BEXRUZ2026)' : 'Введите код и получите скидку -10% (Код: BEXRUZ2026)'}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <input
+                    type="text"
+                    placeholder="BEXRUZ2026"
+                    value={promoCode}
+                    onChange={(e) => setPromoCode(e.target.value)}
+                    disabled={promoApplied}
+                    className={`px-4 py-2.5 rounded-xl border text-xs font-bold uppercase outline-none w-full sm:w-40 ${
+                      darkMode ? 'bg-gray-950 border-gray-800 text-white' : 'bg-gray-100 border-gray-300 text-black'
+                    }`}
+                  />
+                  <button
+                    type="submit"
+                    disabled={promoApplied}
+                    className="px-5 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-black font-black text-xs uppercase shrink-0 transition-all"
+                  >
+                    {promoApplied ? (lang === 'uz' ? 'Qabul qilindi' : 'Принят') : (lang === 'uz' ? 'Kiritish' : 'Ввести')}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         )}
 
@@ -1109,7 +1174,7 @@ export default function Page() {
         {activeTab === 'orders' && (
           <div className="space-y-6 max-w-4xl mx-auto">
             <div className="text-center mb-6">
-              <ShieldCheck className="w-10 h-10 md:w-12 md:h-12 text-emerald-500 mx-auto mb-2" />
+              <ShieldCheck className="w-10 h-10 md:w-12 md:h-12 text-emerald-400 mx-auto mb-2" />
               <h2 className="text-2xl md:text-3xl font-black tracking-tight">{t.ordersTitle}</h2>
               <p className="text-gray-400 text-xs font-semibold mt-1">{t.ordersSub}</p>
             </div>
@@ -1120,11 +1185,11 @@ export default function Page() {
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-gray-800 gap-2 mb-4">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <User className="w-4 h-4 text-emerald-500" />
+                        <User className="w-4 h-4 text-emerald-400" />
                         <span className="text-xs font-extrabold uppercase">{t.customer}: <b className="text-emerald-400">{ord.customerName}</b> ({ord.phone})</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Store className="w-4 h-4 text-orange-500" />
+                        <Store className="w-4 h-4 text-orange-400" />
                         <span className="text-xs font-extrabold text-gray-400 uppercase">{t.seller}: <b className="text-orange-400">{ord.sellerName}</b></span>
                       </div>
                       <span className="text-[10px] text-gray-500 block font-semibold">{t.date}: {ord.date}</span>
@@ -1132,7 +1197,7 @@ export default function Page() {
 
                     <div className="sm:text-right">
                       <span className="text-[10px] text-gray-400 block font-bold uppercase">{t.totalAmount}:</span>
-                      <span className="text-base md:text-lg font-black text-emerald-500">{ord.totalSom.toLocaleString()} SO'M</span>
+                      <span className="text-base md:text-lg font-black text-emerald-400">{ord.totalSom.toLocaleString()} SO'M</span>
                     </div>
                   </div>
 
@@ -1146,7 +1211,7 @@ export default function Page() {
                         </div>
                         <div className="text-right">
                           <span className="text-[10px] md:text-xs text-orange-400 font-black block">{it.quantity} dona/gem</span>
-                          <span className="text-[10px] md:text-xs font-black text-emerald-500">{it.priceSom.toLocaleString()} SO'M</span>
+                          <span className="text-[10px] md:text-xs font-black text-emerald-400">{it.priceSom.toLocaleString()} SO'M</span>
                         </div>
                       </div>
                     ))}
@@ -1170,7 +1235,7 @@ export default function Page() {
               <div className="space-y-6 md:space-y-8">
                 <div className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 md:p-6 rounded-3xl border shadow-md ${darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}>
                   <div>
-                    <h2 className="text-xl md:text-2xl font-black text-orange-500 flex items-center gap-2">
+                    <h2 className="text-xl md:text-2xl font-black text-orange-400 flex items-center gap-2">
                       <SlidersHorizontal className="w-6 h-6" /> {t.adminPanel}
                     </h2>
                     <p className="text-xs text-gray-400 mt-1">MockAPI `/cards` resursini boshqarish va yangi cardlar qo'shish</p>
@@ -1178,7 +1243,7 @@ export default function Page() {
 
                   <button
                     onClick={handleOpenAddModal}
-                    className="px-4 py-2.5 md:px-5 md:py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-black font-extrabold text-xs uppercase tracking-wider rounded-2xl shadow-lg shadow-emerald-500/20 flex items-center gap-2 hover:opacity-90 active:scale-95 transition-transform"
+                    className="px-4 py-2.5 md:px-5 md:py-3 bg-emerald-500 text-black font-extrabold text-xs uppercase tracking-wider rounded-2xl shadow-lg flex items-center gap-2 hover:opacity-90 active:scale-95 transition-transform"
                   >
                     <PlusCircle className="w-5 h-5" />
                     {t.addCard}
@@ -1203,7 +1268,7 @@ export default function Page() {
                             <span>{p.Name || p.title}</span>
                           </td>
                           <td className="p-4 text-xs text-gray-400 max-w-xs truncate">{p.about || p.description}</td>
-                          <td className="p-4 font-extrabold text-emerald-500">{Number(p.value || p.price || 50000).toLocaleString()} SO'M</td>
+                          <td className="p-4 font-extrabold text-emerald-400">{Number(p.value || p.price || 50000).toLocaleString()} SO'M</td>
                           <td className="p-4 text-right">
                             <button
                               onClick={() => handleOpenEditModal(p)}
@@ -1239,8 +1304,13 @@ export default function Page() {
         const isSupercell = titleLower.includes('brawl') || titleLower.includes('clash') || selectedProduct.gameType === 'supercell';
         const isAccountOrKey = titleLower.includes('cs2') || titleLower.includes('steam') || titleLower.includes('discord') || titleLower.includes('valorant') || selectedProduct.gameType === 'account';
 
-        if (selectedProduct.discountPercent) {
-          unitPrice = unitPrice * (1 - selectedProduct.discountPercent / 100);
+        let effectiveDiscount = selectedProduct.discountPercent || 0;
+        if (promoApplied) {
+          effectiveDiscount += 10;
+        }
+
+        if (effectiveDiscount > 0) {
+          unitPrice = unitPrice * (1 - effectiveDiscount / 100);
         }
 
         const calculatedSom = isCurrency ? unitPrice * qty : unitPrice;
@@ -1260,9 +1330,9 @@ export default function Page() {
                 <img src={selectedProduct.img || selectedProduct.image || "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=600&auto=format&fit=crop&q=80"} className="w-16 h-16 md:w-20 md:h-20 rounded-2xl object-cover border border-gray-800" />
                 <div>
                   <h3 className="text-lg md:text-xl font-extrabold">{selectedProduct.Name || selectedProduct.title}</h3>
-                  <span className="text-xs bg-orange-500/20 text-orange-500 font-bold px-2 py-0.5 rounded-md">{selectedProduct.category || 'Game'}</span>
-                  {selectedProduct.discountPercent > 0 && (
-                    <span className="ml-2 text-xs bg-red-500 text-white font-bold px-2 py-0.5 rounded-md">-{selectedProduct.discountPercent}% OFF</span>
+                  <span className="text-xs bg-orange-500/20 text-orange-400 font-bold px-2 py-0.5 rounded-md">{selectedProduct.category || 'Game'}</span>
+                  {effectiveDiscount > 0 && (
+                    <span className="ml-2 text-xs bg-red-500 text-white font-bold px-2 py-0.5 rounded-md">-{effectiveDiscount}% OFF</span>
                   )}
                 </div>
               </div>
@@ -1284,7 +1354,6 @@ export default function Page() {
                   </div>
                 )}
 
-                {/* 1. SUPERCELL O'YINLARI: Supercell Email va ID */}
                 {isSupercell && (
                   <>
                     <div>
@@ -1313,7 +1382,6 @@ export default function Page() {
                   </>
                 )}
 
-                {/* 2. STANDART O'YINLAR (Minecraft, PUBG, Roblox): Nickname va Player ID */}
                 {!isSupercell && !isAccountOrKey && (
                   <>
                     <div>
@@ -1340,7 +1408,6 @@ export default function Page() {
                   </>
                 )}
 
-                {/* 3. AKKOUNT / DIGITALS (CS2, Steam, Discord Nitro): Pochta yoki Login */}
                 {isAccountOrKey && (
                   <div>
                     <label className="text-xs font-extrabold text-emerald-400 block mb-1 uppercase flex items-center gap-1">
@@ -1359,7 +1426,7 @@ export default function Page() {
                 <div className={`p-4 rounded-2xl border flex items-center justify-between ${darkMode ? 'bg-gray-950/80 border-gray-800' : 'bg-gray-50 border-gray-200'}`}>
                   <div>
                     <span className="text-[10px] md:text-xs text-gray-400 font-bold block">{t.totalPriceLabel}</span>
-                    <span className="text-lg md:text-xl font-black text-emerald-500">{calculatedSom.toLocaleString()} SO'M</span>
+                    <span className="text-lg md:text-xl font-black text-emerald-400">{calculatedSom.toLocaleString()} SO'M</span>
                   </div>
                   <div className="text-right">
                     <span className="text-[10px] md:text-xs text-gray-400 font-bold block">{t.usdValLabel}</span>
@@ -1370,7 +1437,7 @@ export default function Page() {
 
               <button
                 onClick={handleAddToCart}
-                className="w-full py-3.5 rounded-2xl bg-emerald-500 text-black font-extrabold text-sm shadow-lg shadow-emerald-500/20 hover:bg-emerald-400 active:scale-95 transition-transform"
+                className="w-full py-3.5 rounded-2xl bg-emerald-500 text-black font-extrabold text-sm shadow-lg hover:bg-emerald-400 active:scale-95 transition-transform"
               >
                 <ShoppingBag className="w-5 h-5 inline mr-2" /> {t.addToCartBtn}
               </button>
@@ -1386,7 +1453,7 @@ export default function Page() {
             <div className="flex-1 overflow-y-auto pr-1">
               <div className="flex items-center justify-between pb-4 border-b border-gray-800 mb-4 md:mb-6">
                 <div className="flex items-center gap-2">
-                  <ShoppingBag className="w-5 h-5 text-emerald-500" />
+                  <ShoppingBag className="w-5 h-5 text-emerald-400" />
                   <h3 className="font-extrabold text-base md:text-lg">{t.cart} ({cart.length})</h3>
                 </div>
                 <button onClick={() => setIsCartOpen(false)} className="p-2 text-gray-400 hover:text-white">
@@ -1410,7 +1477,7 @@ export default function Page() {
                         {item.playerId !== 'Kiritilmadi' && <p className="text-[10px] md:text-xs text-gray-400">ID: {item.playerId}</p>}
                         {item.playerNick !== 'Kiritilmadi' && <p className="text-[10px] md:text-xs text-gray-400">Nick: {item.playerNick}</p>}
                         <p className="text-[10px] md:text-xs text-orange-400 font-bold">Miqdor: {item.quantity}</p>
-                        <p className="text-xs md:text-sm font-extrabold text-emerald-500 mt-0.5">
+                        <p className="text-xs md:text-sm font-extrabold text-emerald-400 mt-0.5">
                           {item.priceSom.toLocaleString()} SO'M <span className="text-[10px] text-amber-500">(${item.priceUsd})</span>
                         </p>
                       </div>
@@ -1461,13 +1528,13 @@ export default function Page() {
                 <div className="flex justify-between items-center text-base md:text-lg font-black">
                   <span>Jami:</span>
                   <div className="text-right">
-                    <div className="text-emerald-500">{cartTotalSom.toLocaleString()} SO'M</div>
+                    <div className="text-emerald-400">{cartTotalSom.toLocaleString()} SO'M</div>
                     <div className="text-xs text-amber-500 font-bold">${cartTotalUsd} USD</div>
                   </div>
                 </div>
                 <button
                   onClick={handleCheckout}
-                  className="w-full py-3.5 md:py-4 bg-gradient-to-r from-emerald-500 via-orange-500 to-amber-500 text-black font-extrabold text-sm md:text-base rounded-2xl shadow-xl flex items-center justify-center gap-2 hover:opacity-95 active:scale-95 transition-transform"
+                  className="w-full py-3.5 md:py-4 bg-gradient-to-r from-emerald-500 via-orange-400 to-amber-500 text-black font-extrabold text-sm md:text-base rounded-2xl shadow-xl flex items-center justify-center gap-2 hover:opacity-95 active:scale-95 transition-transform"
                 >
                   <Send className="w-5 h-5" /> {t.sendOrder}
                 </button>
@@ -1488,7 +1555,7 @@ export default function Page() {
               <X className="w-5 h-5" />
             </button>
 
-            <h3 className="text-xl md:text-2xl font-black mb-1 text-emerald-500">
+            <h3 className="text-xl md:text-2xl font-black mb-1 text-emerald-400">
               {editingCardId ? t.editCard : t.addCard}
             </h3>
 
@@ -1548,7 +1615,7 @@ export default function Page() {
                 <button
                   type="submit"
                   disabled={submittingCard}
-                  className="px-6 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 text-black font-extrabold rounded-xl text-sm shadow-md active:scale-95 transition-transform"
+                  className="px-6 py-2.5 bg-orange-500 text-black font-extrabold rounded-xl text-sm shadow-md active:scale-95 transition-transform"
                 >
                   {submittingCard ? t.saving : t.save}
                 </button>
@@ -1558,7 +1625,7 @@ export default function Page() {
         </div>
       )}
 
-      {/* AUTH MODAL (LOGIN / REGISTER) */}
+      {/* AUTH MODAL */}
       {authModal && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div
@@ -1615,7 +1682,7 @@ export default function Page() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-emerald-500 transition-colors p-1"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-emerald-400 transition-colors p-1"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -1624,7 +1691,7 @@ export default function Page() {
 
                 <button
                   type="submit"
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 via-orange-500 to-amber-500 text-black font-extrabold text-sm shadow-md hover:opacity-95 active:scale-95 transition-transform mt-2"
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 via-orange-400 to-amber-500 text-black font-extrabold text-sm shadow-md hover:opacity-95 active:scale-95 transition-transform mt-2"
                 >
                   {authMode === 'login' ? t.loginTitle : t.registerTitle}
                 </button>
@@ -1634,14 +1701,14 @@ export default function Page() {
                 {authMode === 'login' ? (
                   <button
                     onClick={() => { setAuthMode('register'); setAuthError(''); }}
-                    className="text-emerald-500 font-bold text-xs underline hover:text-emerald-400 transition-colors"
+                    className="text-emerald-400 font-bold text-xs underline hover:text-emerald-300 transition-colors"
                   >
                     {t.registerTitle}
                   </button>
                 ) : (
                   <button
                     onClick={() => { setAuthMode('login'); setAuthError(''); }}
-                    className="text-orange-500 font-bold text-xs underline hover:text-orange-400 transition-colors"
+                    className="text-orange-400 font-bold text-xs underline hover:text-orange-300 transition-colors"
                   >
                     {t.loginTitle}
                   </button>
